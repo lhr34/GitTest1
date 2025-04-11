@@ -9,9 +9,14 @@ app = Flask(__name__)
 app.jinja_env.undefined = StrictUndefined
 app.config.from_object(Config)
 db = SQLAlchemy(app)
+
+# 初始化 LoginManager 以支持用户认证
 login = LoginManager(app)
 login.login_view = 'login'
 
-# 导入视图模块（后续视图中会调用我们的模拟模块）
-from app import views
+# 导入模块（注意：models.py 中需要包含 user_loader 回调）
+from app import views, models, debug_utils
 
+@app.shell_context_processor
+def make_shell_context():
+    return dict(db=db)

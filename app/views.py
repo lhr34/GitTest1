@@ -38,7 +38,7 @@ def simulation():
         # Execute the control strategy based on the new reading
         control_action = control_context.execute_control(new_reading)
     else:
-        # If GET: show last reading if available，否则显示“N/A”
+        # For GET requests, show last reading if available
         new_reading = data_provider.data_history[-1] if data_provider.data_history else "N/A"
         control_action = "N/A"
 
@@ -56,6 +56,6 @@ def simulation():
 
 
 @app.route("/reset_simulation", methods=["POST"])
-def reset_simulation():
+def reset_simulation_route():
     data_provider.data_history.clear()
     return redirect(url_for("simulation"))

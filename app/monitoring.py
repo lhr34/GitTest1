@@ -27,7 +27,7 @@ class DataProvider:
 
 class DashboardDisplay(Observer):
     def update(self, data):
-        # For demonstration, print to console
+        # For demonstration, simply print to console
         print(f"[Dashboard] Current power consumption: {data} Watts")
 
 class DataLogger(Observer):
