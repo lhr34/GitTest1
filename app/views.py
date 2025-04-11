@@ -56,6 +56,7 @@ def simulation():
 
 
 @app.route("/reset_simulation", methods=["POST"])
-def reset_simulation_route():
+def reset_simulation():
     data_provider.data_history.clear()
     return redirect(url_for("simulation"))
+
