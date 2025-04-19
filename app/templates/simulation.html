@@ -3,35 +3,125 @@
 
 {% block content %}
 <h1>Power Management Simulation</h1>
-<div class="mb-3">
-  <p><strong>Latest Sensor Reading:</strong> {{ latest_reading }} Watts</p>
-  <p><strong>Control Action:</strong> {{ control_action }}</p>
+
+<!-- 最新传感器读数卡片 -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h3>Latest Sensor Reading</h3>
+  </div>
+  <div class="card-body">
+    {% if latest_reading != "N/A" %}
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Timestamp:</strong> {{ latest_reading['timestamp'] }}</p>
+          <p><strong>Temperature:</strong> {{ "%.1f"|format(latest_reading['TemperatureSensor']) }} °C</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Humidity:</strong> {{ latest_reading['HumiditySensor'] }}%</p>
+          <p><strong>Light:</strong> {{ latest_reading['LightSensor'] }} lux</p>
+          <p><strong>Power Consumption:</strong> {{ latest_reading['power_consumption'] }} Watts</p>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-muted">No data available</p>
+    {% endif %}
+  </div>
 </div>
-<div class="mb-3">
-  <h3>Data History</h3>
-  {% if data_history %}
-    <ul class="list-group">
-      {% for d in data_history %}
-        <li class="list-group-item">{{ d }} Watts</li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No data available.</p>
-  {% endif %}
+
+<!-- 控制动作显示 -->
+<div class="alert alert-info mb-4">
+  <h4 class="alert-heading">Control Action</h4>
+  <p>{{ control_action }}</p>
 </div>
-<div class="mb-3">
-  <h3>Analysis Report</h3>
-  <p>{{ report }}</p>
-  {% if alerts %}
-      <p><strong>Alerts:</strong> {{ alerts }}</p>
-  {% else %}
-      <p>No alerts.</p>
-  {% endif %}
+
+<!-- 功率历史图表 -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h3>Power Consumption History</h3>
+  </div>
+  <div class="card-body">
+    <canvas id="powerChart" height="200"></canvas>
+      {% block scripts %}
+<!-- 引入 Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // 初始化功率图表
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('powerChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ timestamps|tojson }},
+        datasets: [{
+          label: 'Power Consumption (Watts)',
+          data: {{ power_history|tojson }},
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderWidth: 2,
+          tension: 0.1,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: false,
+            title: {
+              display: true,
+              text: 'Watts'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Time'
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+          {% endblock %}
+  </div>
 </div>
-<form method="post" action="{{ url_for('simulation') }}">
-  <button type="submit" class="btn btn-success">Simulate New Reading</button>
-</form>
-<form method="post" action="{{ url_for('reset_simulation') }}" class="mt-2">
-  <button type="submit" class="btn btn-warning">Reset Data History</button>
-</form>
+
+<!-- 分析报告 -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h3>Analysis Report</h3>
+  </div>
+  <div class="card-body">
+    <p>{{ report }}</p>
+    {% if alerts %}
+      <div class="alert alert-danger">
+        <strong>Alerts:</strong>
+        <ul>
+          {% for alert in alerts %}
+            <li>{{ "%.1f"|format(alert) }} Watts (exceeds threshold)</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% else %}
+      <p class="text-success">No alerts detected.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 操作按钮 -->
+<div class="d-flex gap-2">
+    <form method="post" action="{{ url_for('simulation') }}">
+    <button type="submit" class="btn btn-success">
+      <i class="bi bi-lightning-charge"></i> Simulate New Reading
+    </button>
+    </form>
+    <form method="post" action="{{ url_for('reset_simulation') }}">
+    <button type="submit" class="btn btn-warning">
+      <i class="bi bi-arrow-counterclockwise"></i> Reset Data History
+    </button>
+    </form>
+</div>
+
 {% endblock %}
+

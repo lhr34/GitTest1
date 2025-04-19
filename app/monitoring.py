@@ -27,13 +27,15 @@ class DataProvider:
 
 class DashboardDisplay(Observer):
     def update(self, data):
-        # For demonstration, simply print to console
-        print(f"[Dashboard] Current power consumption: {data} Watts")
+        print(f"[Dashboard] 综合传感器数据 - "
+              f"功率: {data['PowerSensor']}W | "
+              f"温度: {data['TemperatureSensor']}°C | "
+              f"湿度: {data['HumiditySensor']}% | "
+              f"光照: {data['LightSensor']}lux")
 
 class DataLogger(Observer):
     def __init__(self):
         self.log = []
 
     def update(self, data):
-        self.log.append(data)
-        print(f"[DataLogger] Data logged: {data} Watts")
+        print(f"[DataLogger] 记录完整数据: {data}")
