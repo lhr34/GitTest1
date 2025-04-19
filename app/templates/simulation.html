@@ -3,6 +3,19 @@
 
 {% block content %}
 <h1>Power Management Simulation</h1>
+<!-- 操作按钮 -->
+<div class="d-flex gap-2">
+    <form method="post" action="{{ url_for('simulation') }}">
+    <button type="submit" class="btn btn-success">
+      <i class="bi bi-lightning-charge"></i> Simulate New Reading
+    </button>
+    </form>
+    <form method="post" action="{{ url_for('reset_simulation') }}">
+    <button type="submit" class="btn btn-warning">
+      <i class="bi bi-arrow-counterclockwise"></i> Reset Data History
+    </button>
+    </form>
+</div>
 
 <!-- 最新传感器读数卡片 -->
 <div class="card mb-4">
@@ -109,19 +122,6 @@
   </div>
 </div>
 
-<!-- 操作按钮 -->
-<div class="d-flex gap-2">
-    <form method="post" action="{{ url_for('simulation') }}">
-    <button type="submit" class="btn btn-success">
-      <i class="bi bi-lightning-charge"></i> Simulate New Reading
-    </button>
-    </form>
-    <form method="post" action="{{ url_for('reset_simulation') }}">
-    <button type="submit" class="btn btn-warning">
-      <i class="bi bi-arrow-counterclockwise"></i> Reset Data History
-    </button>
-    </form>
-</div>
 
 {% endblock %}
 
