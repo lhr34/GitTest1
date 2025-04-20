@@ -3,18 +3,25 @@
 
 {% block content %}
 <h1>Power Management Simulation</h1>
+
+<!-- 更新时间与刷新倒计时 -->
+<div class="alert alert-secondary d-flex justify-content-between align-items-center">
+  <div><strong>Last Update：</strong> {{ latest_reading['timestamp'] if latest_reading != "N/A" else "No data available" }}</div>
+  <div><strong>Auto Refresh In：</strong> <span id="countdown">05:00</span></div>
+</div>
+
 <!-- 操作按钮 -->
-<div class="d-flex gap-2">
-    <form method="post" action="{{ url_for('simulation') }}">
+<div class="d-flex gap-2 mb-3">
+  <form method="post" action="{{ url_for('simulation') }}">
     <button type="submit" class="btn btn-success">
       <i class="bi bi-lightning-charge"></i> Simulate New Reading
     </button>
-    </form>
-    <form method="post" action="{{ url_for('reset_simulation') }}">
+  </form>
+  <form method="post" action="{{ url_for('reset_simulation') }}">
     <button type="submit" class="btn btn-warning">
       <i class="bi bi-arrow-counterclockwise"></i> Reset Data History
     </button>
-    </form>
+  </form>
 </div>
 
 <!-- 最新传感器读数卡片 -->
@@ -54,49 +61,64 @@
   </div>
   <div class="card-body">
     <canvas id="powerChart" height="200"></canvas>
-      {% block scripts %}
-<!-- 引入 Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  // 初始化功率图表
-  document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('powerChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: {{ timestamps|tojson }},
-        datasets: [{
-          label: 'Power Consumption (Watts)',
-          data: {{ power_history|tojson }},
-          borderColor: 'rgba(75, 192, 192, 1)',
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          borderWidth: 2,
-          tension: 0.1,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: false,
-            title: {
-              display: true,
-              text: 'Watts'
-            }
+    {% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('powerChart').getContext('2d');
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: {{ timestamps|tojson }},
+            datasets: [{
+              label: 'Power Consumption (Watts)',
+              data: {{ power_history|tojson }},
+              borderColor: 'rgba(75, 192, 192, 1)',
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderWidth: 2,
+              tension: 0.1,
+              fill: true
+            }]
           },
-          x: {
-            title: {
-              display: true,
-              text: 'Time'
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'Watts'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Time'
+                }
+              }
             }
           }
+        });
+
+        // 自动刷新倒计时逻辑
+        let secondsLeft = 300; // 5分钟
+        function updateCountdown() {
+          const minutes = Math.floor(secondsLeft / 60);
+          const seconds = secondsLeft % 60;
+          document.getElementById("countdown").textContent =
+            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+          if (secondsLeft > 0) {
+            secondsLeft--;
+          } else {
+            location.reload();
+          }
         }
-      }
-    });
-  });
-</script>
-          {% endblock %}
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+      });
+    </script>
+    {% endblock %}
   </div>
 </div>
 
@@ -122,6 +144,4 @@
   </div>
 </div>
 
-
 {% endblock %}
-

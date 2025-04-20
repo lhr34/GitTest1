@@ -12,7 +12,6 @@ import pandas as pd
 from flask import request
 import math
 
-
 # Initialize global simulation objects
 sensor = PowerSensorSimulator()
 data_provider = DataProvider()
@@ -36,7 +35,6 @@ def home():
     return render_template("home.html", title="Home")
 
 
-# app/views.py
 @app.route("/simulation", methods=["GET", "POST"])
 def simulation():
     last_data = data_provider.data_history[-1] if data_provider.data_history else None
@@ -46,7 +44,7 @@ def simulation():
         sensor_data = sensor.read_value()
         data_provider.set_data(sensor_data)
 
-        append_log(sensor_data, building="Main Library")#加入存储
+        append_log(sensor_data, building="Main Library")  # 加入存储
 
         # 执行控制策略
         control_action = control_context.execute_control(sensor_data)
@@ -75,8 +73,9 @@ def reset_simulation():
     data_provider.data_history.clear()
     return redirect(url_for("simulation"))
 
-@app.route("/logs") #新增路由 /logs 页面显示历史记录（支持导出）
-def logs():#更新 /logs 路由逻辑，添加筛选和分页
+
+@app.route("/logs")  # 新增路由 /logs 页面显示历史记录（支持导出）
+def logs():  # 更新 /logs 路由逻辑，添加筛选和分页
     all_logs = read_logs()
 
     # 提取查询参数
@@ -95,7 +94,7 @@ def logs():#更新 /logs 路由逻辑，添加筛选和分页
     # 分页逻辑
     total = len(all_logs)
     total_pages = math.ceil(total / per_page)
-    logs_paginated = all_logs[(page - 1) * per_page : page * per_page]
+    logs_paginated = all_logs[(page - 1) * per_page: page * per_page]
 
     # 提取唯一建筑列表用于筛选下拉框
     building_options = sorted(set(log['building'] for log in read_logs()))
@@ -112,7 +111,7 @@ def logs():#更新 /logs 路由逻辑，添加筛选和分页
     )
 
 
-@app.route("/export_csv") #新增导出功能
+@app.route("/export_csv")  # 新增导出功能
 def export_csv():
     logs = read_logs()
     df = pd.DataFrame(logs)
