@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Power Logs</h2>
+
+<!-- 筛选表单 -->
+<form method="get" class="row g-3 mb-3">
+  <div class="col-md-4">
+    <label class="form-label">Building</label>
+    <select name="building" class="form-select">
+      <option value="">All</option>
+      {% for b in building_options %}
+        <option value="{{ b }}" {% if b == building_filter %}selected{% endif %}>{{ b }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Date (YYYY-MM-DD)</label>
+    <input type="text" name="date" class="form-control" value="{{ date_filter or '' }}" placeholder="2025-04-19">
+  </div>
+  <div class="col-md-4 align-self-end">
+    <button type="submit" class="btn btn-primary">Apply Filter</button>
+    <a href="{{ url_for('logs') }}" class="btn btn-secondary">Reset</a>
+  </div>
+</form>
+
+<!-- 导出按钮 -->
+<a href="{{ url_for('export_csv') }}" class="btn btn-outline-primary mb-3">
+  Download CSV Report
+</a>
+
+<!-- 数据表格 -->
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Time</th><th>Building</th><th>Power</th><th>Temp</th><th>Humidity</th><th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in logs %}
+    <tr>
+      <td>{{ row.timestamp }}</td>
+      <td>{{ row.building }}</td>
+      <td>{{ row.power }} W</td>
+      <td>{{ row.temperature }} °C</td>
+      <td>{{ row.humidity }} %</td>
+      <td>{{ row.light }} lux</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- 分页导航 -->
+<nav>
+  <ul class="pagination">
+    {% for p in range(1, total_pages + 1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="{{ url_for('logs', page=p, building=building_filter, date=date_filter) }}">{{ p }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>
+
+{% endblock %}

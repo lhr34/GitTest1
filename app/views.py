@@ -6,6 +6,12 @@ from app.monitoring import DataProvider, DashboardDisplay, DataLogger
 from app.analysis import AnalysisEngine
 from app.control import PowerControlContext, AutoControlStrategy
 from datetime import datetime
+from app.data_store import append_log, read_logs
+from flask import Response
+import pandas as pd
+from flask import request
+import math
+
 
 # Initialize global simulation objects
 sensor = PowerSensorSimulator()
@@ -39,6 +45,9 @@ def simulation():
         # 获取完整的传感器数据
         sensor_data = sensor.read_value()
         data_provider.set_data(sensor_data)
+
+        append_log(sensor_data, building="Main Library")#加入存储
+
         # 执行控制策略
         control_action = control_context.execute_control(sensor_data)
     else:
@@ -65,3 +74,52 @@ def simulation():
 def reset_simulation():
     data_provider.data_history.clear()
     return redirect(url_for("simulation"))
+
+@app.route("/logs") #新增路由 /logs 页面显示历史记录（支持导出）
+def logs():#更新 /logs 路由逻辑，添加筛选和分页
+    all_logs = read_logs()
+
+    # 提取查询参数
+    building_filter = request.args.get('building')
+    date_filter = request.args.get('date')
+    page = int(request.args.get('page', 1))
+    per_page = 10
+
+    # 筛选逻辑
+    if building_filter:
+        all_logs = [log for log in all_logs if log["building"] == building_filter]
+
+    if date_filter:
+        all_logs = [log for log in all_logs if log["timestamp"].startswith(date_filter)]
+
+    # 分页逻辑
+    total = len(all_logs)
+    total_pages = math.ceil(total / per_page)
+    logs_paginated = all_logs[(page - 1) * per_page : page * per_page]
+
+    # 提取唯一建筑列表用于筛选下拉框
+    building_options = sorted(set(log['building'] for log in read_logs()))
+
+    return render_template(
+        "logs.html",
+        title="Power Logs",
+        logs=logs_paginated,
+        page=page,
+        total_pages=total_pages,
+        building_filter=building_filter,
+        date_filter=date_filter,
+        building_options=building_options
+    )
+
+
+@app.route("/export_csv") #新增导出功能
+def export_csv():
+    logs = read_logs()
+    df = pd.DataFrame(logs)
+    csv_data = df.to_csv(index=False)
+
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=power_logs.csv"}
+    )
