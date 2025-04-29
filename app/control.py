@@ -9,7 +9,7 @@ class ControlStrategy(ABC):
     def control_action(self, data):
         pass
 
-
+# using Adaptor design pattern to incompatible manuel control and auto control strategy
 class AutoControlStrategy(ControlStrategy):
     # using the trained RandomForest control model
     def __init__(self):

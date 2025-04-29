@@ -130,4 +130,4 @@ with open('sensor_data.csv', 'w', newline='') as f:
     writer.writeheader()
     writer.writerows(data)
 
-print("CSV文件sensor_data.csv已生成")
+print("Dataset 'sensor_data.csv' Is Successfully Generated!")
