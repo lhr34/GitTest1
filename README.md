@@ -71,11 +71,6 @@ The Smart Campus Power Management System is a web-based application designed to 
 - Chart.js (Data visualization)
 - Bootstrap 5 (Frontend styling)
 
-### Design Patterns
-- Observer Pattern (Monitoring subsystem)
-- Strategy Pattern (Control mechanisms)
-- Factory Pattern (Component creation)
-
 ## Implemented Functionalities
 
 ### Core Features
