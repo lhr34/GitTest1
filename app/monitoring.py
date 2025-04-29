@@ -27,11 +27,11 @@ class DataProvider:
 
 class DashboardDisplay(Observer):
     def update(self, data):
-        print(f"[Dashboard] 综合传感器数据 - "
-              f"功率: {data['PowerSensor']}W | "
-              f"温度: {data['TemperatureSensor']}°C | "
-              f"湿度: {data['HumiditySensor']}% | "
-              f"光照: {data['LightSensor']}lux")
+        print(f"[Dashboard] Sensor Date - "
+              f"Power: {data['PowerSensor']}W | "
+              f"Temperature: {data['TemperatureSensor']}°C | "
+              f"Humidity: {data['HumiditySensor']}% | "
+              f"Light: {data['LightSensor']}lux")
 
 class DataLogger(Observer):
     def __init__(self):

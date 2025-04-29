@@ -84,7 +84,7 @@ class SimpleControlSystem:
         elif power_value < 600:
             return "Simple Control System: Normal operation"
         else:
-            return "Simple Control System: High power alert, initiating legacy protocols"
+            return "Simple Control System: High power alert, initiating simple protocols"
 
 
 # create an adapter that makes SimpleControlSystem compatible with ControlStrategy
@@ -94,7 +94,7 @@ class SimpleControlAdapter(ControlStrategy):
 
     def control_action(self, data):
         # Extract just the power value from the complex sensor data
-        # and pass it to the legacy system
+        # and pass it to the simple system
         power_value = data['PowerSensor']
         return self.simple_system.simple_control(power_value)
 

@@ -51,7 +51,7 @@ def simulation():
                 session['control_mode'] = 'auto'
                 flash('Switched to AUTO control mode')
             elif mode == 'simple':
-                control_context.set_strategy(legacy_adapter)
+                control_context.set_strategy(simple_adapter)
                 session['control_mode'] = 'simple'
                 flash('Switched to SIMPLE control system')
             else:
