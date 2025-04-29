@@ -39,10 +39,8 @@ The Smart Campus Power Management System is a web-based application designed to 
    pip install flask flask-sqlalchemy flask-login scikit-learn pandas joblib
    ```
 
-4. **Initialize the database**
-   ```bash
-   flask db upgrade
-   ```
+4. **(First Time Running)Generate Dataset For Model Training **
+   run 'app/data/dataset/dataset_generator.py'
 
 5. **Run the application**
    ```bash
