@@ -4,13 +4,11 @@
 {% block content %}
 <h1>Power Management Simulation</h1>
 
-<!-- 更新时间与刷新倒计时 -->
 <div class="alert alert-secondary d-flex justify-content-between align-items-center">
   <div><strong>Last Update：</strong> {{ latest_reading['timestamp'] if latest_reading != "N/A" else "No data available" }}</div>
   <div><strong>Auto Refresh In：</strong> <span id="countdown">05:00</span></div>
 </div>
 
-<!-- 操作按钮 -->
 <div class="d-flex gap-2 mb-3">
   <form method="post" action="{{ url_for('simulation') }}">
     <button type="submit" class="btn btn-success">
@@ -24,7 +22,60 @@
   </form>
 </div>
 
-<!-- 最新传感器读数卡片 -->
+<div class="card mb-4">
+  <div class="card-header bg-primary text-white">
+    <h3 class="mb-0">Power Control Mode</h3>
+  </div>
+  <div class="card-body">
+    <form method="post" action="{{ url_for('simulation') }}" class="row g-3">
+      <div class="col-md-12">
+        <div class="d-flex justify-content-between">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="control_mode" id="autoMode" value="auto"
+                   {% if control_mode == 'auto' %}checked{% endif %} onchange="this.form.submit()">
+            <label class="form-check-label" for="autoMode">
+              <i class="bi bi-robot"></i> Auto Control
+            </label>
+          </div>
+
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="control_mode" id="ecoMode" value="eco"
+                   {% if control_mode == 'eco' %}checked{% endif %} onchange="this.form.submit()">
+            <label class="form-check-label" for="ecoMode">
+              <i class="bi bi-leaf"></i> Eco Mode
+            </label>
+          </div>
+
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="control_mode" id="normalMode" value="normal"
+                   {% if control_mode == 'normal' %}checked{% endif %} onchange="this.form.submit()">
+            <label class="form-check-label" for="normalMode">
+              <i class="bi bi-gear"></i> Normal Mode
+            </label>
+          </div>
+
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="control_mode" id="full-powerMode" value="full-power"
+                   {% if control_mode == 'full-power' %}checked{% endif %} onchange="this.form.submit()">
+            <label class="form-check-label" for="full-powerMode">
+              <i class="bi bi-lightning"></i> FULL-POWER Mode
+            </label>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="mt-3">
+      <h5>Current Mode:
+        <span class="badge {% if control_mode == 'auto' %}bg-secondary{% elif control_mode == 'eco' %}bg-success{% elif control_mode == 'normal' %}bg-primary{% else %}bg-danger{% endif %}">
+          {{ control_mode|upper }}
+        </span>
+      </h5>
+    </div>
+  </div>
+</div>
+
+
 <div class="card mb-4">
   <div class="card-header">
     <h3>Latest Sensor Reading</h3>
@@ -48,13 +99,11 @@
   </div>
 </div>
 
-<!-- 控制动作显示 -->
-<div class="alert alert-info mb-4">
+<div class="alert {% if control_mode == 'auto' %}alert-info{% elif control_mode == 'eco' %}alert-success{% elif control_mode == 'normal' %}alert-primary{% else %}alert-danger{% endif %} mb-4">
   <h4 class="alert-heading">Control Action</h4>
   <p>{{ control_action }}</p>
 </div>
 
-<!-- 功率历史图表 -->
 <div class="card mb-4">
   <div class="card-header">
     <h3>Power Consumption History</h3>
@@ -100,8 +149,8 @@
           }
         });
 
-        // 自动刷新倒计时逻辑
-        let secondsLeft = 300; // 5分钟
+
+        let secondsLeft = 300;
         function updateCountdown() {
           const minutes = Math.floor(secondsLeft / 60);
           const seconds = secondsLeft % 60;
@@ -122,7 +171,7 @@
   </div>
 </div>
 
-<!-- 分析报告 -->
+
 <div class="card mb-4">
   <div class="card-header">
     <h3>Analysis Report</h3>

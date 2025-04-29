@@ -1,7 +1,7 @@
-# app/control.py
 from abc import ABC, abstractmethod
 import joblib
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 
 
 class ControlStrategy(ABC):
@@ -11,12 +11,16 @@ class ControlStrategy(ABC):
 
 
 class AutoControlStrategy(ControlStrategy):
+    # using the trained RandomForest control model
     def __init__(self):
-        # 加载训练好的模型和编码器
-        self.model = joblib.load('app/ML_model/rf_power_model.pkl')
-        self.le = joblib.load('app/ML_model/label_encoder.pkl')
+        try:
+            self.model = joblib.load('app/ML_model/rf_power_model.pkl')
+            self.le = joblib.load('app/ML_model/label_encoder.pkl')
+        except FileNotFoundError:
+            print("Warning: Model files not found. Using fallback prediction logic.")
+            self.model = None
+            self.le = None
 
-        # 定义控制规则
         self.control_rules = {
             'low': "Power usage: Low;\n Action: Reduce power supply to energy saving mode",
             'normal': "Power usage: Normal;\n Action: Maintain current power supply level",
@@ -25,7 +29,6 @@ class AutoControlStrategy(ControlStrategy):
         }
 
     def _prepare_features(self, data_dict):
-        """准备特征数据框"""
         timestamp = pd.to_datetime(data_dict['timestamp'])
         return pd.DataFrame([{
             'PowerSensor': data_dict['PowerSensor'],
@@ -37,19 +40,42 @@ class AutoControlStrategy(ControlStrategy):
 
     def control_action(self, data):
         try:
-            # 准备特征数据
-            features = self._prepare_features(data)
-
-            # 模型预测
-            pred = self.model.predict(features)[0]
-            level = self.le.inverse_transform([pred])[0]
-
-            # 获取控制指令
-            return self.control_rules.get(level, "未知状态，启用安全模式")
+            if self.model is None:
+                # Fallback logic if model isn't loaded
+                power = data['PowerSensor']
+                if power < 150:
+                    level = 'low'
+                elif power < 500:
+                    level = 'normal'
+                elif power < 700:
+                    level = 'high'
+                else:
+                    level = 'abnormal'
+            else:
+                features = self._prepare_features(data)
+                pred = self.model.predict(features)[0]
+                level = self.le.inverse_transform([pred])[0]
+            return self.control_rules.get(level, "unknown action")
 
         except Exception as e:
-            print(f"预测错误: {str(e)}")
-            return "系统异常，切换至手动模式"
+            print(f"control error: {str(e)}")
+            return "control error，please switch to manuel control"
+
+
+class ManualControlStrategy(ControlStrategy):
+    def __init__(self, mode="normal"):
+        self.set_mode(mode)
+
+    def set_mode(self, mode):
+        self.mode = mode
+        self.control_actions = {
+            "eco": "Manual Control: ECO MODE\nAction: Limiting power consumption to 30%, non-essential systems disabled",
+            "normal": "Manual Control: NORMAL MODE\nAction: Standard power distribution across all systems",
+            "full-power": "Manual Control: FULL-POWER MODE\nAction: Maximum power allocation to all systems, cooling increased"
+        }
+
+    def control_action(self, data):
+        return self.control_actions.get(self.mode, "Unknown mode, fallback to normal operation")
 
 
 class PowerControlContext:
@@ -63,9 +89,3 @@ class PowerControlContext:
         return self.strategy.control_action(data)
 
 
-# 保留原有备用策略
-class FallbackControlStrategy(ControlStrategy):
-    def control_action(self, data):
-        if data['PowerSensor'] > 450:
-            return "备用策略：切断非关键负载"
-        return "备用策略：维持当前状态"
