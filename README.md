@@ -40,16 +40,18 @@ The Smart Campus Power Management System is a web-based application designed to 
    ```
 
 4. **(First Time Running)Generate Dataset For Model Training **
-   run 'app/data/dataset/dataset_generator.py'
+   ```bash
+   python 'app/data/dataset/dataset_generator.py'
+   ```
 
-5. **Run the application**
+6. **Run the application**
    ```bash
    flask run
    # or
    python run.py
    ```
 
-6. **Access the web interface**
+7. **Access the web interface**
    Open your browser and navigate to `http://127.0.0.1:5000`
 
 ## Technologies Used
