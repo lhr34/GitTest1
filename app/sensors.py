@@ -1,14 +1,14 @@
-# app/sensors.py
 import random
 from datetime import datetime
 
-
+# the prototype is running on simulated sensor data
 class PowerSensorSimulator:
     def __init__(self):
         self.last_power = 400
         self.max_power = 800
         self.min_power = 0
 
+    # generate sensor reading in a normal pattern
     def _generate_light(self, hour):
         if 8 <= hour <= 18:
             base = random.randint(800, 2000)

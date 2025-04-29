@@ -1,10 +1,9 @@
-# app/views.py
 from flask import render_template, request, redirect, url_for, flash
 from app import app
 from app.sensors import PowerSensorSimulator
 from app.monitoring import DataProvider, DashboardDisplay, DataLogger
 from app.analysis import AnalysisEngine
-from app.control import PowerControlContext, AutoControlStrategy, ManualControlStrategy
+from app.control import PowerControlContext, AutoControlStrategy, ManualControlStrategy, SimpleControlSystem, SimpleControlAdapter
 from datetime import datetime
 from app.data_store import append_log, read_logs
 from flask import Response
@@ -12,6 +11,7 @@ import pandas as pd
 from flask import request, session
 import math
 
+# Initialize  system
 sensor = PowerSensorSimulator()
 data_provider = DataProvider()
 dashboard = DashboardDisplay()
@@ -22,10 +22,14 @@ data_provider.subscribe(data_logger)
 
 analysis_engine = AnalysisEngine(threshold=450)
 
+# Initialize control system
 auto_strategy = AutoControlStrategy()
 manual_strategy = ManualControlStrategy()
 control_context = PowerControlContext(strategy=auto_strategy)
 
+# Initialize simple control system and its adapter
+simple_system = SimpleControlSystem()
+simple_adapter = SimpleControlAdapter(simple_system)
 
 @app.route("/")
 def home():
@@ -38,6 +42,7 @@ def simulation():
     new_reading = last_data if last_data else "N/A"
     control_mode = session.get('control_mode', 'auto')
 
+    # power control panel
     if request.method == "POST":
         if 'control_mode' in request.form:
             mode = request.form['control_mode']
@@ -45,6 +50,10 @@ def simulation():
                 control_context.set_strategy(auto_strategy)
                 session['control_mode'] = 'auto'
                 flash('Switched to AUTO control mode')
+            elif mode == 'simple':
+                control_context.set_strategy(legacy_adapter)
+                session['control_mode'] = 'simple'
+                flash('Switched to SIMPLE control system')
             else:
                 manual_strategy.set_mode(mode)
                 control_context.set_strategy(manual_strategy)
@@ -52,9 +61,12 @@ def simulation():
                 flash(f'Switched to MANUAL control - {mode.upper()} mode')
             return redirect(url_for('simulation'))
 
+        # get sensor data, set log and display
         sensor_data = sensor.read_value()
         data_provider.set_data(sensor_data)
         append_log(sensor_data, building="Main Library")
+
+        # power control action
         control_action = control_context.execute_control(sensor_data)
     else:
         if new_reading != "N/A":

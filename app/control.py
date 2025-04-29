@@ -1,15 +1,12 @@
 from abc import ABC, abstractmethod
 import joblib
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-
 
 class ControlStrategy(ABC):
     @abstractmethod
     def control_action(self, data):
         pass
 
-# using Adaptor design pattern to incompatible manuel control and auto control strategy
 class AutoControlStrategy(ControlStrategy):
     # using the trained RandomForest control model
     def __init__(self):
@@ -76,6 +73,30 @@ class ManualControlStrategy(ControlStrategy):
 
     def control_action(self, data):
         return self.control_actions.get(self.mode, "Unknown mode, fallback to normal operation")
+
+
+# a new control strategy for simple control systems, does not fit in the ControlStrategy class
+class SimpleControlSystem:
+    def simple_control(self, power_value):
+        # works with simple power value only
+        if power_value < 200:
+            return "Simple Control System: Low power state activated"
+        elif power_value < 600:
+            return "Simple Control System: Normal operation"
+        else:
+            return "Simple Control System: High power alert, initiating legacy protocols"
+
+
+# create an adapter that makes SimpleControlSystem compatible with ControlStrategy
+class SimpleControlAdapter(ControlStrategy):
+    def __init__(self, simple_system):
+        self.simple_system = simple_system
+
+    def control_action(self, data):
+        # Extract just the power value from the complex sensor data
+        # and pass it to the legacy system
+        power_value = data['PowerSensor']
+        return self.simple_system.simple_control(power_value)
 
 
 class PowerControlContext:
