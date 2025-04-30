@@ -119,93 +119,369 @@
   <p>{{ control_action }}</p>
 </div>
 
+<!-- Power Consumption History Chart -->
 <div class="card mb-4">
   <div class="card-header">
     <h3>Power Consumption History</h3>
   </div>
   <div class="card-body">
-    <canvas id="powerChart" height="200"></canvas>
-    {% block scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('powerChart').getContext('2d');
-        const chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: {{ timestamps|tojson }},
-            datasets: [{
-              label: 'Power Consumption (Watts)',
-              data: {{ power_history|tojson }},
-              borderColor: 'rgba(75, 192, 192, 1)',
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              borderWidth: 2,
-              tension: 0.1,
-              fill: true
-            }]
+    <div class="row">
+      <div class="col-md-9">
+        <canvas id="powerChart" height="200"></canvas>
+      </div>
+      <div class="col-md-3">
+        <div class="d-flex flex-column">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="showForecasts" checked>
+            <label class="form-check-label" for="showForecasts">
+              Show Forecasts
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="showThreshold" checked>
+            <label class="form-check-label" for="showThreshold">
+              Show Threshold Line
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Advanced Analysis Dashboard -->
+<div class="row">
+  <!-- Analysis Report Card -->
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>Basic Analysis Report</h3>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshBasicReport">
+          <i class="bi bi-arrow-repeat"></i>
+        </button>
+      </div>
+      <div class="card-body">
+        <p>{{ report }}</p>
+        {% if alerts %}
+          <div class="alert alert-danger">
+            <strong>Alerts:</strong>
+            <ul>
+              {% for alert in alerts %}
+                <li>{{ "%.1f"|format(alert) }} Watts (exceeds threshold)</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% else %}
+          <p class="text-success">No alerts detected.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Severity Based Alerts Card -->
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>Severity-Based Alerts</h3>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshSeverityReport">
+          <i class="bi bi-arrow-repeat"></i>
+        </button>
+      </div>
+      <div class="card-body">
+        <div id="severityAlerts">
+          {% if alerts_with_severity %}
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Value</th>
+                    <th>Severity</th>
+                    <th>% Above Threshold</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for alert in alerts_with_severity %}
+                    <tr class="{% if alert.severity == 'critical' %}table-danger{% elif alert.severity == 'high' %}table-warning{% elif alert.severity == 'moderate' %}table-info{% else %}table-light{% endif %}">
+                      <td>{{ "%.1f"|format(alert.value) }} W</td>
+                      <td>
+                        <span class="badge {% if alert.severity == 'critical' %}bg-danger{% elif alert.severity == 'high' %}bg-warning text-dark{% elif alert.severity == 'moderate' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                          {{ alert.severity|upper }}
+                        </span>
+                      </td>
+                      <td>+{{ alert.excess_percentage }}%</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-success">No severity-based alerts detected.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detailed Analysis Section -->
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h3>Detailed Analysis</h3>
+    <div>
+      <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#detailedAnalysisCollapse" aria-expanded="false">
+        <i class="bi bi-chevron-down"></i> Toggle View
+      </button>
+    </div>
+  </div>
+  <div class="collapse" id="detailedAnalysisCollapse">
+    <div class="card-body">
+      <div class="row">
+        <!-- Statistical Metrics -->
+        <div class="col-md-6">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5>Statistical Analysis</h5>
+            </div>
+            <div class="card-body">
+              {% if detailed_report %}
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>Average:</strong> {{ detailed_report.average }} W</p>
+                    <p><strong>Minimum:</strong> {{ detailed_report.min }} W</p>
+                    <p><strong>Maximum:</strong> {{ detailed_report.max }} W</p>
+                    <p><strong>Median:</strong> {{ detailed_report.median|default('N/A') }} W</p>
+                  </div>
+                  <div class="col-md-6">
+                    <p><strong>Std Deviation:</strong> {{ detailed_report.std_dev|default('N/A') }} W</p>
+                    <p><strong>Alert %:</strong> {{ detailed_report.alert_percentage }}%</p>
+                    {% if detailed_report.trend %}
+                      <p>
+                        <strong>Trend Direction:</strong>
+                        <span class="badge {% if detailed_report.trend == 'increasing' %}bg-danger{% elif detailed_report.trend == 'decreasing' %}bg-success{% else %}bg-info{% endif %}">
+                          {{ detailed_report.trend|upper }}
+                        </span>
+                      </p>
+                      <p><strong>Change %:</strong> {{ detailed_report.trend_change_percentage }}%</p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% else %}
+                <p class="text-muted">Insufficient data for detailed analysis.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern Detection -->
+        <div class="col-md-6">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5>Pattern Detection</h5>
+            </div>
+            <div class="card-body">
+              {% if patterns %}
+                <p>
+                  <strong>Trend Pattern:</strong>
+                  <span class="badge {% if patterns.trend_pattern == 'consistent_increase' %}bg-danger{% elif patterns.trend_pattern == 'consistent_decrease' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                    {{ patterns.trend_pattern|replace('_', ' ')|upper }}
+                  </span>
+                </p>
+                <p>
+                  <strong>Cyclic Pattern:</strong>
+                  {% if patterns.cyclic_pattern %}
+                    <span class="badge bg-info">DETECTED</span>
+                  {% else %}
+                    <span class="badge bg-secondary">NOT DETECTED</span>
+                  {% endif %}
+                </p>
+                <p><strong>Spike Count:</strong> {{ patterns.spike_count }}</p>
+              {% else %}
+                <p class="text-muted">Insufficient data for pattern detection.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Power Forecast -->
+      <div class="card">
+        <div class="card-header">
+          <h5>Power Consumption Forecast</h5>
+        </div>
+        <div class="card-body">
+          {% if forecast %}
+            <div class="table-responsive">
+              <table class="table table-sm table-striped">
+                <thead>
+                  <tr>
+                    <th>Period</th>
+                    <th>Forecasted Power (W)</th>
+                    <th>Prediction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for i in range(forecast|length) %}
+                    <tr>
+                      <td>Period {{ i+1 }}</td>
+                      <td>{{ forecast[i] }}</td>
+                      <td>
+                        {% if forecast[i] > threshold %}
+                          <span class="badge bg-danger">ABOVE THRESHOLD</span>
+                        {% else %}
+                          <span class="badge bg-success">NORMAL</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted">Insufficient data for forecasting.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Power Consumption Chart
+    const ctx = document.getElementById('powerChart').getContext('2d');
+
+    // Prepare data arrays
+    const powerData = {{ power_history|tojson }};
+    const timeLabels = {{ timestamps|tojson }};
+    const threshold = {{ threshold|default(450) }};
+
+    // Add forecast data if available
+    {% if forecast %}
+      const forecastData = {{ forecast|tojson }};
+      const forecastLabels = Array.from({length: forecastData.length}, (_, i) => `Forecast ${i+1}`);
+      const allLabels = [...timeLabels, ...forecastLabels];
+
+      // Create dataset with null values for historical slots
+      const forecastDataset = Array(timeLabels.length).fill(null).concat(forecastData);
+    {% endif %}
+
+    const datasets = [
+      {
+        label: 'Power Consumption (Watts)',
+        data: powerData,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderWidth: 2,
+        tension: 0.1,
+        fill: true
+      }
+    ];
+
+    {% if forecast %}
+      datasets.push({
+        label: 'Forecast (Watts)',
+        data: forecastDataset,
+        borderColor: 'rgba(255, 159, 64, 1)',
+        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        pointStyle: 'triangle',
+        tension: 0.1,
+        fill: false
+      });
+    {% endif %}
+
+    // Add threshold line
+    datasets.push({
+      label: 'Threshold',
+      data: Array({% if forecast %}allLabels{% else %}timeLabels{% endif %}.length).fill(threshold),
+      borderColor: 'rgba(255, 99, 132, 1)',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      borderDash: [10, 5],
+      pointRadius: 0,
+      fill: false
+    });
+
+    const powerChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {% if forecast %}allLabels{% else %}timeLabels{% endif %},
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: false,
+            title: {
+              display: true,
+              text: 'Watts'
+            }
           },
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: false,
-                title: {
-                  display: true,
-                  text: 'Watts'
+          x: {
+            title: {
+              display: true,
+              text: 'Time'
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.dataset.label || '';
+                if (label === 'Threshold') {
+                  return 'Alert Threshold: ' + threshold + ' W';
                 }
-              },
-              x: {
-                title: {
-                  display: true,
-                  text: 'Time'
-                }
+                return label + ': ' + context.raw + ' W';
               }
             }
           }
-        });
-
-
-        let secondsLeft = 300;
-        function updateCountdown() {
-          const minutes = Math.floor(secondsLeft / 60);
-          const seconds = secondsLeft % 60;
-          document.getElementById("countdown").textContent =
-            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-          if (secondsLeft > 0) {
-            secondsLeft--;
-          } else {
-            location.reload();
-          }
         }
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
+      }
+    });
+
+    // Toggle forecast visibility
+    const showForecastsCheckbox = document.getElementById('showForecasts');
+    if (showForecastsCheckbox) {
+      showForecastsCheckbox.addEventListener('change', function() {
+        {% if forecast %}
+          powerChart.data.datasets[1].hidden = !this.checked;
+          powerChart.update();
+        {% endif %}
       });
-    </script>
-    {% endblock %}
-  </div>
-</div>
+    }
 
+    // Toggle threshold visibility
+    const showThresholdCheckbox = document.getElementById('showThreshold');
+    if (showThresholdCheckbox) {
+      showThresholdCheckbox.addEventListener('change', function() {
+        const thresholdIndex = {% if forecast %}2{% else %}1{% endif %};
+        powerChart.data.datasets[thresholdIndex].hidden = !this.checked;
+        powerChart.update();
+      });
+    }
 
-<div class="card mb-4">
-  <div class="card-header">
-    <h3>Analysis Report</h3>
-  </div>
-  <div class="card-body">
-    <p>{{ report }}</p>
-    {% if alerts %}
-      <div class="alert alert-danger">
-        <strong>Alerts:</strong>
-        <ul>
-          {% for alert in alerts %}
-            <li>{{ "%.1f"|format(alert) }} Watts (exceeds threshold)</li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% else %}
-      <p class="text-success">No alerts detected.</p>
-    {% endif %}
-  </div>
-</div>
+    // Countdown timer
+    let secondsLeft = 300;
+    function updateCountdown() {
+      const minutes = Math.floor(secondsLeft / 60);
+      const seconds = secondsLeft % 60;
+      document.getElementById("countdown").textContent =
+        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
+      if (secondsLeft > 0) {
+        secondsLeft--;
+      } else {
+        location.reload();
+      }
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+  });
+</script>
+{% endblock %}
 {% endblock %}
