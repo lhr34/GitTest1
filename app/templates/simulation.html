@@ -243,25 +243,27 @@
               <h5>Statistical Analysis</h5>
             </div>
             <div class="card-body">
-              {% if detailed_report %}
+              {% if detailed_report and detailed_report is mapping %}
                 <div class="row">
                   <div class="col-md-6">
-                    <p><strong>Average:</strong> {{ detailed_report.average }} W</p>
-                    <p><strong>Minimum:</strong> {{ detailed_report.min }} W</p>
-                    <p><strong>Maximum:</strong> {{ detailed_report.max }} W</p>
+                    <p><strong>Average:</strong> {{ detailed_report.average|default('N/A') }} W</p>
+                    <p><strong>Minimum:</strong> {{ detailed_report.min|default('N/A') }} W</p>
+                    <p><strong>Maximum:</strong> {{ detailed_report.max|default('N/A') }} W</p>
                     <p><strong>Median:</strong> {{ detailed_report.median|default('N/A') }} W</p>
                   </div>
                   <div class="col-md-6">
                     <p><strong>Std Deviation:</strong> {{ detailed_report.std_dev|default('N/A') }} W</p>
-                    <p><strong>Alert %:</strong> {{ detailed_report.alert_percentage }}%</p>
-                    {% if detailed_report.trend %}
+                    <p><strong>Alert %:</strong> {{ detailed_report.alert_percentage|default('N/A') }}%</p>
+                    {% if detailed_report.trend is defined %}
                       <p>
                         <strong>Trend Direction:</strong>
                         <span class="badge {% if detailed_report.trend == 'increasing' %}bg-danger{% elif detailed_report.trend == 'decreasing' %}bg-success{% else %}bg-info{% endif %}">
                           {{ detailed_report.trend|upper }}
                         </span>
                       </p>
-                      <p><strong>Change %:</strong> {{ detailed_report.trend_change_percentage }}%</p>
+                      {% if detailed_report.trend_change_percentage is defined %}
+                        <p><strong>Change %:</strong> {{ detailed_report.trend_change_percentage }}%</p>
+                      {% endif %}
                     {% endif %}
                   </div>
                 </div>
@@ -279,22 +281,28 @@
               <h5>Pattern Detection</h5>
             </div>
             <div class="card-body">
-              {% if patterns %}
-                <p>
-                  <strong>Trend Pattern:</strong>
-                  <span class="badge {% if patterns.trend_pattern == 'consistent_increase' %}bg-danger{% elif patterns.trend_pattern == 'consistent_decrease' %}bg-success{% else %}bg-warning text-dark{% endif %}">
-                    {{ patterns.trend_pattern|replace('_', ' ')|upper }}
-                  </span>
-                </p>
-                <p>
-                  <strong>Cyclic Pattern:</strong>
-                  {% if patterns.cyclic_pattern %}
-                    <span class="badge bg-info">DETECTED</span>
-                  {% else %}
-                    <span class="badge bg-secondary">NOT DETECTED</span>
-                  {% endif %}
-                </p>
-                <p><strong>Spike Count:</strong> {{ patterns.spike_count }}</p>
+              {% if patterns and patterns is mapping %}
+                {% if patterns.trend_pattern is defined %}
+                  <p>
+                    <strong>Trend Pattern:</strong>
+                    <span class="badge {% if patterns.trend_pattern == 'consistent_increase' %}bg-danger{% elif patterns.trend_pattern == 'consistent_decrease' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                      {{ patterns.trend_pattern|replace('_', ' ')|upper }}
+                    </span>
+                  </p>
+                {% endif %}
+                {% if patterns.cyclic_pattern is defined %}
+                  <p>
+                    <strong>Cyclic Pattern:</strong>
+                    {% if patterns.cyclic_pattern %}
+                      <span class="badge bg-info">DETECTED</span>
+                    {% else %}
+                      <span class="badge bg-secondary">NOT DETECTED</span>
+                    {% endif %}
+                  </p>
+                {% endif %}
+                {% if patterns.spike_count is defined %}
+                  <p><strong>Spike Count:</strong> {{ patterns.spike_count }}</p>
+                {% endif %}
               {% else %}
                 <p class="text-muted">Insufficient data for pattern detection.</p>
               {% endif %}
@@ -309,7 +317,7 @@
           <h5>Power Consumption Forecast</h5>
         </div>
         <div class="card-body">
-          {% if forecast %}
+          {% if forecast and forecast|length > 0 %}
             <div class="table-responsive">
               <table class="table table-sm table-striped">
                 <thead>
@@ -325,7 +333,7 @@
                       <td>Period {{ i+1 }}</td>
                       <td>{{ forecast[i] }}</td>
                       <td>
-                        {% if forecast[i] > threshold %}
+                        {% if threshold is defined and forecast[i] > threshold %}
                           <span class="badge bg-danger">ABOVE THRESHOLD</span>
                         {% else %}
                           <span class="badge bg-success">NORMAL</span>
@@ -358,7 +366,7 @@
     const threshold = {{ threshold|default(450) }};
 
     // Add forecast data if available
-    {% if forecast %}
+    {% if forecast and forecast|length > 0 %}
       const forecastData = {{ forecast|tojson }};
       const forecastLabels = Array.from({length: forecastData.length}, (_, i) => `Forecast ${i+1}`);
       const allLabels = [...timeLabels, ...forecastLabels];
@@ -379,7 +387,7 @@
       }
     ];
 
-    {% if forecast %}
+    {% if forecast and forecast|length > 0 %}
       datasets.push({
         label: 'Forecast (Watts)',
         data: forecastDataset,
@@ -396,7 +404,7 @@
     // Add threshold line
     datasets.push({
       label: 'Threshold',
-      data: Array({% if forecast %}allLabels{% else %}timeLabels{% endif %}.length).fill(threshold),
+      data: Array({% if forecast and forecast|length > 0 %}allLabels{% else %}timeLabels{% endif %}.length).fill(threshold),
       borderColor: 'rgba(255, 99, 132, 1)',
       backgroundColor: 'transparent',
       borderWidth: 2,
@@ -408,7 +416,7 @@
     const powerChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: {% if forecast %}allLabels{% else %}timeLabels{% endif %},
+        labels: {% if forecast and forecast|length > 0 %}allLabels{% else %}timeLabels{% endif %},
         datasets: datasets
       },
       options: {
@@ -448,7 +456,7 @@
     const showForecastsCheckbox = document.getElementById('showForecasts');
     if (showForecastsCheckbox) {
       showForecastsCheckbox.addEventListener('change', function() {
-        {% if forecast %}
+        {% if forecast and forecast|length > 0 %}
           powerChart.data.datasets[1].hidden = !this.checked;
           powerChart.update();
         {% endif %}
@@ -459,7 +467,7 @@
     const showThresholdCheckbox = document.getElementById('showThreshold');
     if (showThresholdCheckbox) {
       showThresholdCheckbox.addEventListener('change', function() {
-        const thresholdIndex = {% if forecast %}2{% else %}1{% endif %};
+        const thresholdIndex = {% if forecast and forecast|length > 0 %}2{% else %}1{% endif %};
         powerChart.data.datasets[thresholdIndex].hidden = !this.checked;
         powerChart.update();
       });
