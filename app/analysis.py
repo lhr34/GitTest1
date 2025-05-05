@@ -66,8 +66,12 @@ class AnalysisEngine:
                 excess_percentage = (data - self.threshold) / self.threshold
 
                 # Determine severity based on how much it exceeds the threshold
-                severity = 'low'
-                for level, percentage in self.severity_levels.items():
+                # MODIFIED: Changed the logic to correctly assign severity levels
+                # The issue was that we were using the first level that matched the condition
+                # but we need to find the most severe level that applies
+                severity = 'low'  # Default severity
+                for level, percentage in sorted(self.severity_levels.items(),
+                                                key=lambda x: x[1], reverse=True):
                     if excess_percentage >= percentage:
                         severity = level
                         break
