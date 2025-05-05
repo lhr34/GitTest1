@@ -37,17 +37,18 @@
     </tr>
   </thead>
   <tbody>
-    {% for row in logs %}
-    <tr>
-      <td>{{ row.timestamp }}</td>
-      <td>{{ row.building }}</td>
-      <td>{{ row.power }} W</td>
-      <td>{{ row.temperature }} °C</td>
-      <td>{{ row.humidity }} %</td>
-      <td>{{ row.light }} lux</td>
-    </tr>
-    {% endfor %}
-  </tbody>
+  {% for row in logs %}
+  <tr>
+    <td>{{ row.timestamp }}</td>
+    <td>{{ row.building }}</td>
+    <td>{{ row.PowerSensor }} W</td>
+    <td>{{ row.TemperatureSensor }} °C</td>
+    <td>{{ row.HumiditySensor }} %</td>
+    <td>{{ row.LightSensor }} lux</td>
+  </tr>
+  {% endfor %}
+</tbody>
+
 </table>
 
 <!-- 分页导航 -->

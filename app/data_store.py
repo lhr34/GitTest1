@@ -1,30 +1,44 @@
+# app/data_store.py
+
 import csv
-from datetime import datetime
 import os
+from datetime import datetime
 
-LOG_FILE = "data/power_log.csv"
+# 默认日志路径
+LOG_FILE = "app/static/power_log.csv"
 
-HEADERS = ['timestamp', 'building', 'power', 'temperature', 'humidity', 'light']
+# 写入日志
+def append_log(data, building="Unknown"):
+    file_exists = os.path.isfile(LOG_FILE)
 
-def ensure_log_file():
-    os.makedirs("data", exist_ok=True)
-    if not os.path.exists(LOG_FILE):
-        with open(LOG_FILE, "w", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(HEADERS)
-
-def append_log(data: dict, building="Main Library"):
-    ensure_log_file()
-    with open(LOG_FILE, "a", newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            data['timestamp'], building,
-            data['PowerSensor'], data['TemperatureSensor'],
-            data['HumiditySensor'], data['LightSensor']
+    with open(LOG_FILE, mode="a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=[
+            "timestamp", "building", "PowerSensor", "TemperatureSensor", "HumiditySensor", "LightSensor"
         ])
 
+        if not file_exists:
+            writer.writeheader()
+
+        writer.writerow({
+            "timestamp": data["timestamp"],
+            "building": building,
+            "PowerSensor": data["PowerSensor"],
+            "TemperatureSensor": data["TemperatureSensor"],
+            "HumiditySensor": data["HumiditySensor"],
+            "LightSensor": data["LightSensor"]
+        })
+
+# 读取日志（修复字段名问题）
 def read_logs():
-    ensure_log_file()
-    with open(LOG_FILE, newline='') as f:
+    logs = []
+    if not os.path.exists(LOG_FILE):
+        return logs
+
+    with open(LOG_FILE, mode="r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        return list(reader)
+        for row in reader:
+            # 清理字段名：strip 去除空格，保留原始大小写
+            cleaned_row = {k.strip(): v for k, v in row.items()}
+            logs.append(cleaned_row)
+
+    return logs
