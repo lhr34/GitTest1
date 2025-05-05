@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -7,7 +6,9 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score
 import joblib
 
-
+# this is the code for training a Random Forest model that is used in AutoControlStrategy class in control.py
+# the dataset used to train the model is generated at dataset_generator.py
+# in real life scenario, the training data is the power system sensor data with y:(power level) labeled manually
 def train_power_model():
 
     df = pd.read_csv('data/dataset/sensor_data.csv')

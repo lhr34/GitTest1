@@ -1,7 +1,9 @@
 import random
 from datetime import datetime
 
+# sensor data are supposed to be processed by control strategies defined in control.py
 # the prototype is running on simulated sensor data
+# in real life scenario, they are readings from physical sensors
 class PowerSensorSimulator:
     def __init__(self):
         self.last_power = 400

@@ -2,6 +2,13 @@ from abc import ABC, abstractmethod
 import joblib
 import pandas as pd
 
+# control.py defines all the control strategies that are used to control the power supply system
+# since the interface of the power supply system is unknown,
+# the control action is made by texts that can be further implementing into real control actions
+# according to the power supply system
+
+# ControlStrategy class is a base class that defines the interface for all control strategies
+# each control strategies will rewrite the function control_action()
 class ControlStrategy(ABC):
     @abstractmethod
     def control_action(self, data):
@@ -10,6 +17,8 @@ class ControlStrategy(ABC):
 class AutoControlStrategy(ControlStrategy):
     # using the trained RandomForest control model
     def __init__(self):
+        # Initialize the auto control strategy by loading the trained model and label encoder.
+        # Fallback to simple rule-based logic if model files are missing.
         try:
             self.model = joblib.load('app/ML_model/rf_power_model.pkl')
             self.le = joblib.load('app/ML_model/label_encoder.pkl')
@@ -26,6 +35,7 @@ class AutoControlStrategy(ControlStrategy):
         }
 
     def _prepare_features(self, data_dict):
+        # Process raw sensor data into a DataFrame to compatible with the ML model.
         timestamp = pd.to_datetime(data_dict['timestamp'])
         return pd.DataFrame([{
             'PowerSensor': data_dict['PowerSensor'],
@@ -36,6 +46,9 @@ class AutoControlStrategy(ControlStrategy):
         }])
 
     def control_action(self, data):
+        # rewrite parent class' control_action() function
+        # execute control action using ML model
+        # if no model loaded, use fallback rules
         try:
             if self.model is None:
                 # Fallback logic if model isn't loaded
@@ -49,6 +62,7 @@ class AutoControlStrategy(ControlStrategy):
                 else:
                     level = 'abnormal'
             else:
+                # using ML model to control system
                 features = self._prepare_features(data)
                 pred = self.model.predict(features)[0]
                 level = self.le.inverse_transform([pred])[0]
@@ -64,6 +78,7 @@ class ManualControlStrategy(ControlStrategy):
         self.set_mode(mode)
 
     def set_mode(self, mode):
+        # the manuel mode has 3 power modes to be manually select
         self.mode = mode
         self.control_actions = {
             "eco": "Manual Control: ECO MODE\nAction: Limiting power consumption to 30%, non-essential systems disabled",
@@ -72,10 +87,12 @@ class ManualControlStrategy(ControlStrategy):
         }
 
     def control_action(self, data):
+        # by using flask form and view handler, user can update the control mode manually
         return self.control_actions.get(self.mode, "Unknown mode, fallback to normal operation")
 
 
-# a new control strategy for simple control systems, does not fit in the ControlStrategy class
+# assume there is another outdated control strategy:SimpleControlSystem,
+# which doesn't inherit ControlStrategy class, so it can't running control strategy directly like other strategies
 class SimpleControlSystem:
     def simple_control(self, power_value):
         # works with simple power value only
@@ -87,7 +104,9 @@ class SimpleControlSystem:
             return "Simple Control System: High power alert, initiating simple protocols"
 
 
-# create an adapter that makes SimpleControlSystem compatible with ControlStrategy
+# to make this control strategy class works, we need to create an adapter
+# that makes SimpleControlSystem compatible with ControlStrategy class
+# which inherits ControlStrategy class and rewrites method control_action()
 class SimpleControlAdapter(ControlStrategy):
     def __init__(self, simple_system):
         self.simple_system = simple_system
@@ -100,6 +119,7 @@ class SimpleControlAdapter(ControlStrategy):
 
 
 class PowerControlContext:
+    # PowerControlContext class to manage and execute the selected control strategy
     def __init__(self, strategy: ControlStrategy = None):
         self.strategy = strategy or AutoControlStrategy()
 
