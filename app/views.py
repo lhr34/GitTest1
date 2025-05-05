@@ -11,6 +11,9 @@ from flask import Response
 import pandas as pd
 from flask import request, session
 import math
+from flask import Blueprint
+
+main_bp = Blueprint("main", __name__)
 
 # Initialize system components
 sensor = PowerSensorSimulator()

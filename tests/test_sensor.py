@@ -28,19 +28,21 @@ def test_sensor_max_value(sensor):
     assert value['PowerSensor'] <= 800
 
 
-def test_sensor_light_variation(sensor, monkeypatch):
+from unittest.mock import patch
+from datetime import datetime
+
+def test_sensor_light_variation(sensor):
+    with patch("app.sensors.datetime") as mock_datetime:
+
+        mock_datetime.now.return_value = datetime(2023, 1, 1, 10)
+        day_values = [sensor.read_value()["LightSensor"] for _ in range(100)]
 
 
+        mock_datetime.now.return_value = datetime(2023, 1, 1, 2)
+        night_values = [sensor.read_value()["LightSensor"] for _ in range(100)]
 
-    def mock_light(hour):
-        return 2000 if 8 <= hour <= 18 else 300
-
-
-    monkeypatch.setattr(sensor, '_generate_light', mock_light)
-
-    day_values = [sensor.read_value()['LightSensor'] for _ in range(100)]
-    night_values = [sensor.read_value()['LightSensor'] for _ in range(100)]
     assert sum(day_values) / len(day_values) > sum(night_values) / len(night_values)
+
 
 
 def test_temperature_humidity_consistency(sensor):
