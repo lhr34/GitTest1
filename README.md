@@ -122,7 +122,7 @@ The Smart Campus Power Management System is a web-based application designed to 
 ## Contribution
 | Student Name & ID | Contribution (%) | Key Contributions / Tasks Completed | Comments (if any) | Signature |
 |--------|--------|--------|--------|--------|
-|Hengrui Lu 2865255|33%|Backend: implement power control features; data generating and ML model training; <br>Frontend: power control panel; sensor data display; power consumption graph; <br>Other: README file|        |Hengrui Lu|
+|Hengrui Lu 2865255|25%|Backend: implement power control features; data generating and ML model training; <br>Frontend: power control panel; sensor data display; power consumption graph; <br>Other: README file|        |Hengrui Lu|
 |        |        |        |        |        |
 |        |        |        |        |        |
 |        |        |        |        |        |
