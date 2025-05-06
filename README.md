@@ -120,9 +120,9 @@ The Smart Campus Power Management System is a web-based application designed to 
 
 
 ## Contribution
-| Student Name & ID   | Contribution (%) | Key Contributions / Tasks Completed                                                                                                                                                                                                                                  | Comments (if any) | Signature   |
-|---------------------|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|-------------|
-| Hengrui Lu 2865255  | 25%              | Backend: implement power control features; data generating and ML model training; <br>Frontend: power control panel; sensor data display; power consumption graph; <br>Other: README file                                                                            |        | Hengrui Lu  |
-| Xinjie Lin 2886547  | 25%              | Testing: Testing infrastructure setup, analysis engine validation, control strategy verification, user model testing, sensor simulation checks, and data logging operations. Generating test reports and making sure bugs are fixed.                                 |        | Xinjie Lin  |
-| Kaijie Chen 2887223 | 25%              | Backend: Built analysis engine with anomaly detection, pattern recognition, forecasting system, and RESTful API for data updates. <br>Frontend: Designed responsive interface with interactive power charts, severity-based alerts, and collapsible analysis panels. |        | Kaijie Chen |
-| Zixu Niu 2872155    | 25%              | Backend: implemented Feature 1 (Power Monitoring Platform), including real-time data collection, historical data storage, and report export functionality. Frontend: participated in the design of the power monitoring panel and sensor data display interface. Other: README file    |        | Zixu Niu    |
+| Student Name & ID | Contribution (%) | Key Contributions / Tasks Completed | Comments (if any) | Signature |
+|--------|--------|--------|--------|--------|
+|Hengrui Lu 2865255|25%|Backend: implement power control features; data generating and ML model training; <br>Frontend: power control panel; sensor data display; power consumption graph; <br>Other: README file|        |Hengrui Lu|
+|Xinjie Lin 2886547|25%|Testing: Testing infrastructure setup, analysis engine validation, control strategy verification, user model testing, sensor simulation checks, and data logging operations. Generating test reports and making sure bugs are fixed.|        |Xinjie Lin|
+|Kaijie Chen 2887223|25%|Backend: Built analysis engine with anomaly detection, pattern recognition, forecasting system, and RESTful API for data updates. <br>Frontend: Designed responsive interface with interactive power charts, severity-based alerts, and collapsible analysis panels.|        |Kaijie Chen|
+|        |        |        |        |        |
