@@ -1,4 +1,4 @@
-# app/analysis.py
+
 """
 Analysis module for power monitoring system.
 This module contains the AnalysisEngine class which provides methods for
