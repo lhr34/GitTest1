@@ -1,7 +1,7 @@
 # Smart Campus Power Management System
 
 ## Project Overview
-The Smart Campus Power Management System is a web-based application designed to monitor, analyze, and control power usage across campus buildings. It simulates real-time power sensor readings along with environmental data (temperature, humidity, light), performs analysis to detect anomalies, and implements intelligent control strategies based on power consumption patterns. The system uses machine learning (Random Forest) to classify power usage into different levels and recommend appropriate control actions. This platform aims to optimize energy usage, reduce costs, and prevent overloads by providing automated management and manual override capabilities. With its simulation features, the system allows for testing different scenarios without affecting real-world operations, making it an ideal tool for both educational purposes and practical energy management planning.
+The Smart Campus Power Management System is a web-based application designed to track, analyze, and manage electricity consumption in real-time. It simulates sensor data and provides tools for anomaly detection, trend analysis, and automated control responses. The system features multiple control strategies, detailed analytics with severity classification, pattern detection, and consumption forecasting. It's suitable for building management systems, industrial power monitoring, or any scenario requiring intelligent power consumption oversight.
 
 ## Installation and Setup
 
@@ -73,32 +73,51 @@ The Smart Campus Power Management System is a web-based application designed to 
 
 ## Implemented Functionalities
 
-### Core Features
-1. **Power Monitoring Simulation**
-   - Real-time sensor data simulation
-   - Environmental parameters tracking (temperature, humidity, light)
-   
-2. **Power Analysis**
-   - Threshold-based anomaly detection
-   - Trend analysis and reporting
-   
-3. **Intelligent Control**
-   - ML-based automatic control recommendations
-   - Manual control modes (Eco, Normal, Full-Power)
-   
-4. **Data Visualization**
-   - Interactive power consumption charts
-   - Real-time updates and countdowns
-   
-5. **Logging System**
-   - Persistent data storage
-   - Filterable log views
-   - CSV export capabilities
+# Key Features
 
-### Additional Features
-- Modular architecture with clear separation of concerns
-- Object-oriented design with design patterns implementation
-- Automated model training on startup
+## Advanced Power Analytics
+
+- **Threshold-based Alerts**: Detect anomalies when consumption exceeds configurable thresholds.
+- **Severity Classification**: Categorize alerts into critical, high, moderate, and low based on excess percentage.
+- **Trend Analysis**: Generate average, min/max, median, and standard deviation reports.
+- **Pattern Detection**: Identify cyclic trends, spikes, and consistent increases/decreases using moving averages.
+- **Consumption Forecasting**: Predict future usage with a weighted moving average model.
+
+## Adaptive Control Strategies
+
+### Auto Mode
+- Uses a trained Random Forest model for intelligent decision-making.
+- Fallback to rule-based logic if models are unavailable (e.g., "Start backup power" for high usage).
+
+### Manual Modes
+- Allow the user to select 3 different power modes manually.
+
+### Legacy Integration
+- Adapter for compatibility with older `SimpleControlSystem`.
+
+## Real-Time Monitoring & Observers
+
+- **Live Dashboard**: Display sensor data (power, temperature, humidity, light).
+- **Data Logging**: Capture and store historical readings with timestamps.
+- **Observer Pattern**: Notify subscribers (e.g., dashboard, logger) on new data.
+
+## Reporting & Diagnostics
+
+- **Detailed Reports**: Include peak times, trend direction, and alert percentages.
+- **CSV Export**: Download logs for offline analysis.
+- **API Endpoints**: Fetch analytics (alerts, forecasts, patterns) in JSON format.
+
+## Simulation & Testing
+
+- **Sensor Simulator**: Generates realistic power, temperature, humidity, and light data.
+- **Unit Tests**: Validate analysis logic, control strategies, user models, and data storage.
+- **Test Report**: HTML report for pytest results (`report.html`).
+
+## User Management
+
+- Secure authentication with password hashing.
+- Session-based control mode persistence.
+
 
 ## Contribution
 | Student Name & ID | Contribution (%) | Key Contributions / Tasks Completed | Comments (if any) | Signature |
