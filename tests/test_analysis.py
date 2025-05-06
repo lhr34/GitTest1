@@ -15,10 +15,11 @@ def test_threshold_analysis():
 
 # Test that the analyzer classifies severity correctly based on thresholds
 def test_severity_classification():
-    analyzer = AnalysisEngine(threshold=500)  # Same threshold for consistency
-    data = [500, 600, 900, 1000]  # Test data
-    results = analyzer.analyze_with_severity(data)  # Analyze data with severity levels
+    analyzer = AnalysisEngine(threshold=500)
+    data = [500, 600, 900, 1000]
+    results = analyzer.analyze_with_severity(data)
 
-    # Check the severity of individual results
-    assert results[1]['severity'] == 'moderate'  # 600 should be classified as 'moderate'
-    assert results[2]['severity'] == 'critical'  # 900 should be classified as 'critical'
+    assert results[0]['severity'] == 'low'       # 500 -> 0% excess
+    assert results[1]['severity'] == 'moderate'  # 600 -> 20% excess
+    assert results[2]['severity'] == 'critical'  # 900 -> 80% excess
+    assert results[3]['severity'] == 'critical'  # 1000 -> 100% excess

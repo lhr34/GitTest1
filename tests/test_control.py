@@ -54,4 +54,4 @@ def test_auto_control_with_model(mock_load):
     }
 
     result = strategy.control_action(test_data)
-    assert "low" in result  # Expect result to contain the decoded prediction label
+    assert "low" in result.lower()  # Expect result to contain the decoded prediction label

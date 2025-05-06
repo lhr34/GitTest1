@@ -61,7 +61,7 @@ class AnalysisEngine:
 
         result = []
         for data in power_history:
-            if data > self.threshold:
+            if data >= self.threshold:
                 # Calculate how much it exceeds the threshold by
                 excess_percentage = (data - self.threshold) / self.threshold
 
