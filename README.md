@@ -39,7 +39,7 @@ The Smart Campus Power Management System is a web-based application designed to 
    pip install flask flask-sqlalchemy flask-login scikit-learn pandas joblib
    ```
 
-4. **(First Time Running)Generate Dataset For Model Training **
+4. **(First Time Running)Generate Dataset For Model Training**
    ```bash
    python 'app/data/dataset/dataset_generator.py'
    ```
@@ -101,5 +101,9 @@ The Smart Campus Power Management System is a web-based application designed to 
 - Automated model training on startup
 
 ## Contribution
-
-### Work Description
+| Student Name & ID | Contribution (%) | Key Contributions / Tasks Completed | Comments (if any) | Signature |
+|--------|--------|--------|--------|--------|
+|Hengrui Lu 2865255|33%|Backend: implement power control features; data generating and ML model training; <br>Frontend: power control panel; sensor data display; power consumption graph; <br>Other: README file|        |Hengrui Lu|
+|        |        |        |        |        |
+|        |        |        |        |        |
+|        |        |        |        |        |
