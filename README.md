@@ -84,7 +84,7 @@ The Smart Campus Power Management System is a web-based application designed to 
 - **Consumption Forecasting**: Predict future usage with a weighted moving average model.
 
 ## Adaptive Control Strategies
-
+- **Using real-time sensor data input to control power supply**
 ### Auto Mode
 - Uses a trained Random Forest model for intelligent decision-making.
 - Fallback to rule-based logic if models are unavailable (e.g., "Start backup power" for high usage).
